@@ -36,12 +36,28 @@ async function run() {
       db.collection("cars");
 
     // Get all cars
-    app.get("/cars", async (req, res) => {
-      const result =
-        await carCollection.find().toArray();
+   app.get("/cars", async (req, res) => {
+  const { type, search } = req.query;
 
-      res.send(result);
-    });
+  let query = {};
+
+  if (type) {
+    query.carType = type;
+  }
+
+  if (search) {
+    query.carName = {
+      $regex: search,
+      $options: "i",
+    };
+  }
+
+  const result = await carCollection
+    .find(query)
+    .toArray();
+
+  res.send(result);
+});
 
     // Get single car
     app.get(
