@@ -19,6 +19,7 @@ const client = new MongoClient(uri, {
   }
 });
 
+
 async function run() {
   try {
     
@@ -28,7 +29,17 @@ async function run() {
     app.get('/cars', async(req,res)=>{
     const result = await carCollection.find().toArray()
     res.json(result)
+
 })
+app.get("/cars/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const result = await carCollection.findOne({
+    _id: id,
+  });
+
+  res.send(result);
+});
     app.post('/cars', async (req,res)=>{
     const carsData = req.body
     console.log(carsData)
