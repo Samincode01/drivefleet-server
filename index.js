@@ -25,6 +25,10 @@ async function run() {
     await client.connect();
     const db = client.db("drivefleet")
     const carCollection = db.collection("cars")
+    app.get('/cars', async(req,res)=>{
+    const result = await carCollection.find().toArray()
+    res.json(result)
+})
     app.post('/cars', async (req,res)=>{
     const carsData = req.body
     console.log(carsData)
