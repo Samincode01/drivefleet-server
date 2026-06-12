@@ -34,6 +34,8 @@ async function run() {
     const db = client.db("drivefleet");
     const carCollection =
       db.collection("cars");
+    const bookingCollection =
+  db.collection("bookings");
 
     // Get all cars
    app.get("/cars", async (req, res) => {
@@ -60,19 +62,15 @@ async function run() {
 });
 
     // Get single car
-    app.get(
-      "/cars/:id",
-      async (req, res) => {
-        const id = req.params.id;
+ app.get("/cars/:id", async (req, res) => {
+  const id = req.params.id;
 
-        const result =
-          await carCollection.findOne({
-            _id: new ObjectId(id),
-          });
+  const result = await carCollection.findOne({
+    _id: id,
+  });
 
-        res.send(result);
-      }
-    );
+  res.send(result);
+});
 
     // Add car
     app.post("/cars", async (req, res) => {
@@ -115,7 +113,7 @@ async function run() {
         const result =
           await carCollection.updateOne(
             {
-              _id: new ObjectId(id),
+              _id: id,
             },
             {
               $set: updatedCar,
@@ -125,6 +123,87 @@ async function run() {
         res.send(result);
       }
     );
+    // Book car
+    app.post("/bookings", async (req, res) => {
+  const bookingData = req.body;
+
+  const bookingResult =
+    await bookingCollection.insertOne(
+      bookingData
+    );
+
+  await carCollection.updateOne(
+    {
+      _id: bookingData.carId,
+    },
+    {
+      $inc: {
+        bookingCount: 1,
+      },
+    }
+  );
+
+  res.send(bookingResult);
+});
+app.get("/all-bookings", async (req, res) => {
+  const result = await bookingCollection
+    .find()
+    .toArray();
+
+  res.send(result);
+});
+app.get("/bookings/:email", async (req, res) => {
+  const email = req.params.email;
+
+  console.log("Searching for:", email);
+
+  const result =
+    await bookingCollection
+      .find({
+        userEmail: email,
+      })
+      .toArray();
+
+  console.log(result);
+
+  res.send(result);
+});
+app.delete("/bookings/:id", async (req, res) => {
+  const id = req.params.id;
+
+  // Find booking first
+  const booking =
+    await bookingCollection.findOne({
+      _id: new ObjectId(id),
+    });
+
+  if (!booking) {
+    return res.send({
+      deletedCount: 0,
+    });
+  }
+
+  // Delete booking
+  const result =
+    await bookingCollection.deleteOne({
+      _id: new ObjectId(id),
+    });
+
+  // Decrease booking count
+  await carCollection.updateOne(
+    {
+      _id: booking.carId,
+    },
+    {
+      $inc: {
+        bookingCount: -1,
+      },
+    }
+  );
+
+  res.send(result);
+});
+
 
     // Delete car
     app.delete(
@@ -134,7 +213,7 @@ async function run() {
 
         const result =
           await carCollection.deleteOne({
-            _id: new ObjectId(id),
+            _id: id,
           });
 
         res.send(result);
