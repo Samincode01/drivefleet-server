@@ -30,7 +30,7 @@ const client = new MongoClient(
 
 async function run() {
   try {
-    await client.connect();
+   await client.connect();
 
     const db = client.db("drivefleet");
     const carCollection =
@@ -230,9 +230,9 @@ app.delete("/bookings/:id", async (req, res) => {
       }
     );
 
-    await client
-      .db("admin")
-      .command({ ping: 1 });
+    // await client
+    //   .db("admin")
+    //   .command({ ping: 1 });
 
     console.log(
       "MongoDB Connected Successfully"
@@ -248,8 +248,4 @@ app.get("/", (req, res) => {
   res.send("Server is running");
 });
 
-app.listen(PORT, () => {
-  console.log(
-    `Server running on port ${PORT}`
-  );
-});
+module.exports = app
