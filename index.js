@@ -27,6 +27,7 @@ const client = new MongoClient(
   }
 );
 
+
 async function run() {
   try {
     await client.connect();
@@ -38,7 +39,14 @@ async function run() {
   db.collection("bookings");
 
     // Get all cars
-   app.get("/cars", async (req, res) => {
+   app.get("/cars", async (req, res,next) => {
+    console.log("AUTH:", req.headers.authorization);
+     const authHeader = req.headers.authorization;
+if (!authHeader) {
+  return res.status(401).send({
+    message: "Unauthorized",
+  });
+}
   const { type, search } = req.query;
 
   let query = {};
@@ -60,6 +68,7 @@ async function run() {
 
   res.send(result);
 });
+
 
     // Get single car
  app.get("/cars/:id", async (req, res) => {
@@ -145,6 +154,7 @@ async function run() {
 
   res.send(bookingResult);
 });
+
 app.get("/all-bookings", async (req, res) => {
   const result = await bookingCollection
     .find()
