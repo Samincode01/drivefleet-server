@@ -63,15 +63,6 @@ app.get("/test", (req, res) => {
 // Get All Cars
 app.get("/cars", async (req, res) => {
   try {
-    const authHeader =
-      req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).send({
-        message: "Unauthorized",
-      });
-    }
-
     const { type, search } =
       req.query;
 
@@ -157,14 +148,22 @@ app.get(
   "/my-added-cars/:email",
   async (req, res) => {
     try {
+      const authHeader =
+        req.headers.authorization;
+
+      if (!authHeader) {
+        return res.status(401).send({
+          message: "Unauthorized",
+        });
+      }
+
       const email =
         req.params.email;
 
       const result =
         await carCollection
           .find({
-            ownerEmail:
-              email,
+            ownerEmail: email,
           })
           .toArray();
 
@@ -173,8 +172,7 @@ app.get(
       console.log(error);
 
       res.status(500).send({
-        message:
-          "Server Error",
+        message: "Server Error",
       });
     }
   }
